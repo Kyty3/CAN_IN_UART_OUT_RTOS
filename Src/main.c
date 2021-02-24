@@ -52,6 +52,7 @@ DMA_HandleTypeDef hdma_usart1_tx;
 osThreadId defaultTaskHandle;
 osThreadId UART_CANHandle;
 osThreadId CAN_UARTHandle;
+
 /* USER CODE BEGIN PV */
 xSemaphoreHandle xBinarySemaphore;
 xSemaphoreHandle xSecondBinarySemaphore;
@@ -159,11 +160,11 @@ int main(void)
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of UART_CAN */
-  osThreadDef(UART_CAN, start_send_can, osPriorityIdle, 0, 128);
+  osThreadDef(UART_CAN, start_send_can, osPriorityAboveNormal, 0, 128);
   UART_CANHandle = osThreadCreate(osThread(UART_CAN), NULL);
 
   /* definition and creation of CAN_UART */
-  osThreadDef(CAN_UART, start_send_uart, osPriorityIdle, 0, 128);
+  osThreadDef(CAN_UART, start_send_uart, osPriorityAboveNormal, 0, 128);
   CAN_UARTHandle = osThreadCreate(osThread(CAN_UART), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -340,11 +341,19 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+	
+	 /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 
@@ -376,6 +385,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
+
 void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
